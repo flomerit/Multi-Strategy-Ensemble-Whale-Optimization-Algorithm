@@ -22,7 +22,7 @@ G = 500    # 最大迭代数
 P = 30    # 种群数
 run_times = 50  # 运行次数
 table = pd.DataFrame(np.zeros([6, 36]), index=['avg', 'std', 'worst', 'best', 'ideal', 'time'])
-loss_curves = np.zeros([G, 36])
+loss_curves = np.zeros([G, 36])  # 36是测试函数个数
 F_table = np.zeros([run_times, 36])
 for t in range(run_times):
     item = 0
