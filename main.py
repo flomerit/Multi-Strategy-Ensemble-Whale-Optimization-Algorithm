@@ -17,27 +17,27 @@ import bound_X
 import ideal_F
 import dimension
 
-D = 30
-G = 500
-P = 30
-run_times = 50
+D = 30    # 维数
+G = 500    # 最大迭代数
+P = 30    # 种群数
+run_times = 50  # 运行次数
 table = pd.DataFrame(np.zeros([6, 36]), index=['avg', 'std', 'worst', 'best', 'ideal', 'time'])
 loss_curves = np.zeros([G, 36])
 F_table = np.zeros([run_times, 36])
 for t in range(run_times):
     item = 0
-    ub = bound_X.Sphere()[1]*np.ones(dimension.Sphere(D))
+    ub = bound_X.Sphere()[1]*np.ones(dimension.Sphere(D))    #  上界（np数组进行维数匹配）
     lb = bound_X.Sphere()[0]*np.ones(dimension.Sphere(D))
     optimizer = MSWOA(fitness=benchmark.Sphere,
                       D=dimension.Sphere(D), P=P, G=G, ub=ub, lb=lb)
-    st = time.time()
-    optimizer.opt()
-    ed = time.time()
-    F_table[t, item] = optimizer.gbest_F
-    table[item]['avg'] += optimizer.gbest_F
-    table[item]['time'] += ed - st
-    table[item]['ideal'] = ideal_F.Sphere()
-    loss_curves[:, item] += optimizer.loss_curve
+    st = time.time()  # 开始计时
+    optimizer.opt()   # 运行MSWOA
+    ed = time.time()  # 结束计时
+    F_table[t, item] = optimizer.gbest_F     #  F_table 存储每个测试函数每次迭代的最佳值--行是迭代次数，列为测试函数代号
+    table[item]['avg'] += optimizer.gbest_F  # table的每一行为一个测试函数的数据，存储最佳适应度
+    table[item]['time'] += ed - st    # table['time'][item] += ed - st
+    table[item]['ideal'] = ideal_F.Sphere()  # 理想值
+    loss_curves[:, item] += optimizer.loss_curve  # 将优化过程中的损失曲线添加到 loss_curves 中，其中 loss_curve 是 MSWOA 类中记录的每次迭代的目标函数值的数组
 
     
     item = item + 1
@@ -571,7 +571,7 @@ for t in range(run_times):
     print(t+1)
 
 loss_curves = loss_curves / run_times
-loss_curves = pd.DataFrame(loss_curves)
+loss_curves = pd.DataFrame(loss_curves)    # 方便后续对数据的处理、分析和可视化。
 loss_curves.columns = ['Sphere', 'Rastrigin', 'Ackley', 'Griewank', 'Schwefel P2.22',
                        'Rosenbrock', 'Sehwwefel P2.21', 'Quartic', 'Schwefel P1.2', 'Penalized 1',
                        'Penalized 2', 'Schwefel P2.26', 'Step', 'Kowalik', 'Shekel Foxholes',
@@ -579,12 +579,12 @@ loss_curves.columns = ['Sphere', 'Rastrigin', 'Ackley', 'Griewank', 'Schwefel P2
                        'Shekel 10', 'Six-Hump Camel-Back', 'Hartmann 6', 'Zakharov', 'Sum Squares',
                        'Alpine', 'Michalewicz', 'Exponential', 'Schaffer', 'Bent Cigar',
                        'Bohachevsky 1', 'Elliptic', 'Drop Wave', 'Cosine Mixture', 'Ellipsoidal',
-                       'Levy and Montalvo 1']
-loss_curves.to_csv('loss_curves(MSWOA).csv')
+                       'Levy and Montalvo 1']     # 列名设置为一个包含了多个字符串的列表
+loss_curves.to_csv('loss_curves(MSWOA).csv')    # 将 DataFrame table 中的数据保存为一个名为 'table(MSWOA).csv' 的 CSV 文件。CSV 文件是一种常见的文本文件格式，用于存储表格数据
 
-table.loc[['avg', 'time']] = table.loc[['avg', 'time']] / run_times
-table.loc['worst'] = F_table.max(axis=0)
-table.loc['best'] = F_table.min(axis=0)
+table.loc[['avg', 'time']] = table.loc[['avg', 'time']] / run_times    # table DataFrame 中索引为 'avg' 和 'time' 的行的值除以变量 run_times，然后重新赋值给相同的行
+table.loc['worst'] = F_table.max(axis=0)  # 将 F_table 中每列的最大值（即迭代中每个测试函数表现最不好的）添加到 table DataFrame 中的一个新行，该行的索引为 'worst'
+table.loc['best'] = F_table.min(axis=0)   
 table.loc['std'] = F_table.std(axis=0)
 table.columns = ['Sphere', 'Rastrigin', 'Ackley', 'Griewank', 'Schwefel P2.22',
                  'Rosenbrock', 'Sehwwefel P2.21', 'Quartic', 'Schwefel P1.2', 'Penalized 1',
